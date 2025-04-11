@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDDIES 🛍️</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛍️</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="animated-bg min-h-screen font-['Poppins']">
+    <!-- Navigation -->
+    <nav class="bg-white/20 backdrop-blur-md fixed w-full top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="text-white text-2xl font-bold">EDDIES 🛍️</div>
+            <div class="flex items-center space-x-4">
+                <button onclick="document.getElementById('sell-modal').classList.remove('hidden')" class="glow-button bg-yellow-500 text-white px-4 py-2 rounded-lg">
+                    Sell Item
+                </button>
+                <button id="cart-icon" class="relative text-white">
+                    <i class="fas fa-shopping-cart text-2xl"></i>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">0</span>
+                </button>
+                <button onclick="document.getElementById('login-modal').classList.remove('hidden')" class="glow-button bg-blue-500 text-white px-4 py-2 rounded-lg">
+                    Sign In
+                </button>
+                <button onclick="document.getElementById('register-modal').classList.remove('hidden')" class="glow-button bg-green-500 text-white px-4 py-2 rounded-lg">
+                    Sign Up
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="pt-24 pb-12 text-center text-white">
+        <h1 class="text-5xl font-bold mb-4 glow-text">HI WELCOME TO EDDIES</h1>
+        <p class="text-xl">HAVE FUN SHOPPING</p>
+    </div>
+
+    <!-- Categories -->
+    <div class="container mx-auto px-4 py-8">
+        <h2 class="text-3xl font-bold text-white mb-6">Categories</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <a href="/category/games" class="category-card bg-white/20 backdrop-blur-md p-6 rounded-lg text-white text-center cursor-pointer hover:transform hover:scale-105 transition-all" data-category="games">
+                <i class="fas fa-gamepad text-4xl mb-4"></i>
+                <h3 class="text-xl font-semibold">Games</h3>
+            </a>
+            <a href="/category/electronics" class="category-card bg-white/20 backdrop-blur-md p-6 rounded-lg text-white text-center cursor-pointer hover:transform hover:scale-105 transition-all" data-category="electronics">
+                <i class="fas fa-mobile-alt text-4xl mb-4"></i>
+                <h3 class="text-xl font-semibold">Electronics</h3>
+            </a>
+            <a href="/category/fashion" class="category-card bg-white/20 backdrop-blur-md p-6 rounded-lg text-white text-center cursor-pointer hover:transform hover:scale-105 transition-all" data-category="fashion">
+                <i class="fas fa-tshirt text-4xl mb-4"></i>
+                <h3 class="text-xl font-semibold">Fashion</h3>
+            </a>
+            <a href="/category/beauty" class="category-card bg-white/20 backdrop-blur-md p-6 rounded-lg text-white text-center cursor-pointer hover:transform hover:scale-105 transition-all" data-category="beauty">
+                <i class="fas fa-spa text-4xl mb-4"></i>
+                <h3 class="text-xl font-semibold">Beauty</h3>
+            </a>
+            <a href="/" class="category-card bg-white/20 backdrop-blur-md p-6 rounded-lg text-white text-center cursor-pointer hover:transform hover:scale-105 transition-all">
+                <i class="fas fa-border-all text-4xl mb-4"></i>
+                <h3 class="text-xl font-semibold">All Products</h3>
+            </a>
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="container mx-auto px-4 py-8">
+        <h2 class="text-3xl font-bold text-white mb-6">Featured Products</h2>
+        <div id="products-grid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {% for product in products %}
+            <div class="product-card bg-white/20 backdrop-blur-md p-6 rounded-lg text-white" data-category="{{ product.category }}">
+                <img src="{{ product.image }}" alt="{{ product.name }}" class="w-full h-48 object-cover rounded-lg mb-4">
+                <h3 class="text-xl font-bold">{{ product.name }}</h3>
+                <p class="text-gray-200 mt-2">{{ product.description }}</p>
+                <p class="text-2xl font-bold mt-4">${{ "%.2f"|format(product.price) }}</p>
+                <button data-product='{{ product|tojson|safe }}'
+                        onclick="cart.addItem(JSON.parse(this.dataset.product))"
+                        class="glow-button bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg mt-4 w-full transition-all duration-300">
+                    Add to Cart
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full">
+            <h2 class="text-2xl font-bold mb-4">Sign In</h2>
+            <form class="space-y-4">
+                <div>
+                    <label class="block text-gray-700">Email</label>
+                    <input type="email" class="w-full border rounded px-3 py-2" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700">Password</label>
+                    <input type="password" class="w-full border rounded px-3 py-2" autocomplete="current-password" required>
+                </div>
+                <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded glow-button">
+                    Sign In
+                </button>
+            </form>
+            <button onclick="this.parentElement.parentElement.classList.add('hidden')" class="absolute top-4 right-4">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="register-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full">
+            <h2 class="text-2xl font-bold mb-4">Sign Up</h2>
+            <form onsubmit="registerUser(event)" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700">Full Name</label>
+                    <input type="text" name="name" class="w-full border rounded px-3 py-2" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700">Email</label>
+                    <input type="email" name="email" class="w-full border rounded px-3 py-2" required>
+                </div>
+                <div class="flex space-x-2">
+                    <div class="w-1/3">
+                        <label class="block text-gray-700">Country Code</label>
+                        <select id="country-code" name="countryCode" class="w-full border rounded px-3 py-2">
+                            <!-- Country codes will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="w-2/3">
+                        <label class="block text-gray-700">Phone Number</label>
+                        <input type="tel" name="phone" class="w-full border rounded px-3 py-2" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-gray-700">Password</label>
+                    <input type="password" name="password" class="w-full border rounded px-3 py-2" autocomplete="new-password" required>
+                </div>
+                <button type="submit" class="w-full bg-green-500 text-white py-2 rounded glow-button">
+                    Sign Up
+                </button>
+            </form>
+            <button onclick="this.parentElement.parentElement.classList.add('hidden')" class="absolute top-4 right-4">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Upload Product Modal -->
+    <div id="upload-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full">
+            <h2 class="text-2xl font-bold mb-4">Upload Product</h2>
+            <form onsubmit="uploadProduct(event)" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700">Product Name</label>
+                    <input type="text" name="name" class="w-full border rounded px-3 py-2" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700">Price</label>
+                    <input type="number" name="price" step="0.01" class="w-full border rounded px-3 py-2" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700">Category</label>
+                    <select name="category" class="w-full border rounded px-3 py-2">
+                        <option value="games">Games</option>
+                        <option value="electronics">Electronics</option>
+                        <option value="fashion">Fashion</option>
+                        <option value="beauty">Beauty</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700">Image</label>
+                    <input type="file" name="image" accept="image/*" class="w-full border rounded px-3 py-2" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700">Description</label>
+                    <textarea name="description" class="w-full border rounded px-3 py-2" required></textarea>
+                </div>
+                <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded glow-button">
+                    Upload Product
+                </button>
+            </form>
+            <button onclick="this.parentElement.parentElement.classList.add('hidden')" class="absolute top-4 right-4">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Sell Modal -->
+    <div id="sell-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full">
+            <h2 class="text-2xl font-bold mb-4">Sell Your Item</h2>
+            <form onsubmit="uploadProduct(event)" class="space-y-4" enctype="multipart/form-data">
+                <div>
+                    <label class="block text-gray-700">Product Name</label>
+                    <input type="text" name="name" class="w-full border rounded px-3 py-2" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700">Price</label>
+                    <input type="number" name="price" step="0.01" class="w-full border rounded px-3 py-2" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700">Category</label>
+                    <select name="category" class="w-full border rounded px-3 py-2">
+                        <option value="games">Games</option>
+                        <option value="electronics">Electronics</option>
+                        <option value="fashion">Fashion</option>
+                        <option value="beauty">Beauty</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700">Image</label>
+                    <input type="file" name="image" accept="image/*" class="w-full border rounded px-3 py-2" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700">Description</label>
+                    <textarea name="description" class="w-full border rounded px-3 py-2" required></textarea>
+                </div>
+                <button type="submit" class="w-full bg-yellow-500 text-white py-2 rounded glow-button">
+                    List Item for Sale
+                </button>
+            </form>
+            <button onclick="this.parentElement.parentElement.classList.add('hidden')" class="absolute top-4 right-4">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div id="cart-sidebar" class="fixed right-0 top-0 h-full w-80 bg-white transform translate-x-full transition-transform duration-300 ease-in-out">
+        <div class="p-4">
+            <h2 class="text-2xl font-bold mb-4">Shopping Cart</h2>
+            <div id="cart-items" class="space-y-4">
+                <!-- Cart items will be dynamically added here -->
+            </div>
+            <div class="mt-4 pt-4 border-t">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="font-bold">Total:</span>
+                    <span id="cart-total" class="text-xl font-bold">$0.00</span>
+                </div>
+                <button class="w-full bg-green-500 text-white py-2 rounded glow-button">
+                    Checkout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
