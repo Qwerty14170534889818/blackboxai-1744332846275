@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ category|title }} - EDDIES 🛍️</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'custom-bg': 'rgba(255, 255, 255, 0.1)',
+                    },
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="animated-bg min-h-screen font-['Poppins']">
+    <!-- Navigation -->
+    <nav class="bg-white/20 backdrop-blur-md fixed w-full top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="/" class="text-white text-2xl font-bold">EDDIES 🛍️</a>
+            <div class="flex items-center space-x-4">
+                <button onclick="document.getElementById('sell-modal').classList.remove('hidden')" class="glow-button bg-green-500 text-white px-4 py-2 rounded-lg">
+                    Sell Item
+                </button>
+                <button id="cart-icon" class="relative text-white">
+                    <i class="fas fa-shopping-cart text-2xl"></i>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">0</span>
+                </button>
+                <button onclick="document.getElementById('login-modal').classList.remove('hidden')" class="glow-button bg-blue-500 text-white px-4 py-2 rounded-lg">
+                    Sign In
+                </button>
+                <button onclick="document.getElementById('register-modal').classList.remove('hidden')" class="glow-button bg-green-500 text-white px-4 py-2 rounded-lg">
+                    Sign Up
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Category Header -->
+    <div class="pt-24 pb-12 text-center text-white">
+        <h1 class="text-5xl font-bold mb-4 glow-text">{{ category|title }}</h1>
+        <p class="text-xl">Find the best {{ category|lower }} products</p>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {% if products %}
+                {% for product in products %}
+                <div class="product-card group bg-white/20 backdrop-blur-md p-6 rounded-2xl text-white shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-2xl border border-white/10 flex flex-col" data-category="{{ product.category }}">
+                    <div class="relative flex-shrink-0 overflow-hidden rounded-xl">
+                        <img src="{{ product.image }}" alt="{{ product.name }}" class="w-full h-56 object-cover transform group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                        <span class="absolute top-3 right-3 px-3 py-1.5 bg-blue-500/90 backdrop-blur-sm rounded-full text-sm font-semibold shadow-lg">
+                            {{ product.category }}
+                        </span>
+                    </div>
+                    <div class="flex-grow mt-4">
+                        <h3 class="text-xl font-bold mb-2 group-hover:text-blue-400 transition-colors">{{ product.name }}</h3>
+                        <p class="text-gray-300 text-sm mb-4 line-clamp-2">{{ product.description }}</p>
+                        <div class="mt-auto pt-4 border-t border-white/10">
+                            <p class="text-2xl font-bold mb-4 flex items-baseline">
+                                <span class="text-sm text-gray-300 mr-1">$</span>
+                                <span>{{ "%.2f"|format(product.price) }}</span>
+                            </p>
+                            <button data-product="{{ product|tojson|safe }}"
+                                    onclick="cart.addItem(this.dataset.product ? JSON.parse(this.dataset.product) : null)"
+                                    class="glow-button bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-xl w-full transition-all duration-300 flex items-center justify-center space-x-2 group-hover:shadow-lg">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Add to Cart</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-span-full text-center text-white py-12">
+                    <i class="fas fa-box-open text-6xl mb-4"></i>
+                    <p class="text-2xl">No products found in this category.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sell Modal -->
+    <div id="sell-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full">
+            <h2 class="text-2xl font-bold mb-4">Sell Your Item</h2>
+            <form onsubmit="uploadProduct(event)" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700">Product Name</label>
+                    <input type="text" name="name" class="w-full border rounded px-3 py-2" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700">Price</label>
+                    <input type="number" name="price" step="0.01" class="w-full border rounded px-3 py-2" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700">Category</label>
+                    <select name="category" class="w-full border rounded px-3 py-2">
+                        <option value="games">Games</option>
+                        <option value="electronics">Electronics</option>
+                        <option value="fashion">Fashion</option>
+                        <option value="beauty">Beauty</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700">Image</label>
+                    <input type="file" name="image" accept="image/*" class="w-full border rounded px-3 py-2" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700">Description</label>
+                    <textarea name="description" class="w-full border rounded px-3 py-2" required></textarea>
+                </div>
+                <button type="submit" class="w-full bg-green-500 text-white py-2 rounded glow-button">
+                    List Item for Sale
+                </button>
+            </form>
+            <button onclick="this.parentElement.parentElement.classList.add('hidden')" class="absolute top-4 right-4">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div id="cart-sidebar" class="fixed right-0 top-0 h-full w-80 bg-white transform translate-x-full transition-transform duration-300 ease-in-out">
+        <div class="p-4">
+            <h2 class="text-2xl font-bold mb-4">Shopping Cart</h2>
+            <div id="cart-items" class="space-y-4">
+                <!-- Cart items will be dynamically added here -->
+            </div>
+            <div class="mt-4 pt-4 border-t">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="font-bold">Total:</span>
+                    <span id="cart-total" class="text-xl font-bold">$0.00</span>
+                </div>
+                <button class="w-full bg-green-500 text-white py-2 rounded glow-button">
+                    Checkout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
